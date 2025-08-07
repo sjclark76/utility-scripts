@@ -82,7 +82,7 @@ show_menu() {
 
 # Function to list merged PRs
 list_merged_prs() {
-    print_color $GREEN "\n📋 Recent merged PRs:"
+    print_color $GREEN "\n📋  Recent merged PRs:"
     gh pr list --state merged --limit 20 --json number,title,headRefName,mergedAt,author --template '
 {{- range . -}}
 PR #{{.number}}: {{.title}}
@@ -117,16 +117,16 @@ PR #{{.number}}: {{.title}} (merged {{timeago .mergedAt}})
 {{- end -}}')
 
     if [ -n "$pr_info" ]; then
-        print_color $GREEN "✅ Found merged PR for '$branch_name':"
+        print_color $GREEN "✅  Found merged PR for '$branch_name':"
         echo "$pr_info"
     else
-        print_color $YELLOW "❌ No merged PR found for '$branch_name'"
+        print_color $YELLOW "❌  No merged PR found for '$branch_name'"
     fi
 }
 
 # Function to list local branches with merged PRs
 list_local_merged_branches() {
-    print_color $GREEN "\n🔍 Checking local branches against merged PRs..."
+    print_color $GREEN "\n🔍  Checking local branches against merged PRs..."
 
     local default_branch=$(get_default_branch)
     local branches_to_check=($(git branch --format='%(refname:short)' | grep -v "$default_branch"))
@@ -146,7 +146,7 @@ list_local_merged_branches() {
 {{- end -}}')
 
         if [ -n "$pr_info" ]; then
-            print_color $GREEN "  ✅ $branch -> $pr_info"
+            print_color $GREEN "  ✅  $branch -> $pr_info"
             found_merged=true
         fi
     done
@@ -158,7 +158,7 @@ list_local_merged_branches() {
 
 # Function to safely clean up merged branches
 cleanup_merged_branches() {
-    print_color $GREEN "\n🧹 Safe cleanup of merged branches..."
+    print_color $GREEN "\n🧹  Safe cleanup of merged branches..."
 
     local default_branch=$(get_default_branch)
 
@@ -183,7 +183,7 @@ cleanup_merged_branches() {
         # Double-check with GitHub PR status
         local pr_info=$(gh pr list --state merged --head "$branch" --json number --template '{{range .}}{{.number}}{{end}}')
         if [ -n "$pr_info" ]; then
-            echo "  ✅ $branch (PR #$pr_info)"
+            echo "  ✅  $branch (PR #$pr_info)"
         else
             echo "  ⚠️  $branch (no PR found - may be direct merge)"
         fi
@@ -197,7 +197,7 @@ cleanup_merged_branches() {
             print_color $GREEN "Deleting $branch..."
             git branch -d "$branch"
         done
-        print_color $GREEN "✅ Cleanup complete!"
+        print_color $GREEN "✅  Cleanup complete!"
     else
         print_color $YELLOW "Cleanup cancelled."
     fi
@@ -205,7 +205,7 @@ cleanup_merged_branches() {
 
 # Function to update from remote and prune
 update_and_prune() {
-    print_color $GREEN "\n🔄 Updating from remote and pruning..."
+    print_color $GREEN "\n🔄  Updating from remote and pruning..."
 
     local default_branch=$(get_default_branch)
 
@@ -222,12 +222,12 @@ update_and_prune() {
     git checkout "$default_branch"
     git pull origin "$default_branch"
 
-    print_color $GREEN "✅ Update complete!"
+    print_color $GREEN "✅  Update complete!"
 }
 
 # Function to show branch status summary
 show_branch_summary() {
-    print_color $GREEN "\n📊 Branch Status Summary"
+    print_color $GREEN "\n📊  Branch Status Summary"
 
     local default_branch=$(get_default_branch)
 
@@ -237,9 +237,9 @@ show_branch_summary() {
     echo -e "\n${BLUE}Local branches:${NC}"
     git branch --format='%(refname:short)' | while read branch; do
         if [ "$branch" = "$default_branch" ]; then
-            echo "  🏠 $branch (default)"
+            echo "  🏠  $branch (default)"
         else
-            echo "  📝 $branch"
+            echo "  📝  $branch"
         fi
     done
 
@@ -249,7 +249,7 @@ show_branch_summary() {
 
 # Main script execution
 main() {
-    print_color $BLUE "🚀 Interactive Branch Cleanup Tool"
+    print_color $BLUE "🚀  Interactive Branch Cleanup Tool"
 
     # Check prerequisites
     check_gh_cli
@@ -281,7 +281,7 @@ main() {
                 show_branch_summary
                 ;;
             7)
-                print_color $GREEN "👋 Goodbye!"
+                print_color $GREEN "👋  Goodbye!"
                 exit 0
                 ;;
             *)
