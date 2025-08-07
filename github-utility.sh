@@ -244,10 +244,7 @@ show_branch_summary() {
     done
 
     echo -e "\n${BLUE}Recent merged PRs (last 10):${NC}"
-    gh pr list --state merged --limit 10 --json number,title,headRefName --template '
-{{- range . -}}
-  PR #{{.number}}: {{.title}} ({{.headRefName}})
-{{- end -}}'
+    gh pr list --state merged --limit 10 --json number,title,headRefName --template '{{range .}}  - PR #{{.number}}: {{.title}} ({{.headRefName}}){{"\n"}}{{end}}'
 }
 
 # Main script execution
