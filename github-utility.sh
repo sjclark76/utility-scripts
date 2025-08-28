@@ -67,6 +67,63 @@ get_default_branch() {
     echo "$default_branch"
 }
 
+# Function to edit the description of the current branch
+edit_branch_description() {
+    local current_branch=$(git rev-parse --abbrev-ref HEAD)
+    local config_key="branch.$current_branch.description"
+    
+    print_color $BLUE "Editing description for branch '$current_branch'"
+    
+    # Get existing description
+    local existing_desc=$(git config $config_key)
+    
+    # Prompt user for new description
+    echo "Enter new description (press Enter to save):"
+    read -e -p "> " new_desc
+    
+    if [ -n "$new_desc" ]; then
+        git config $config_key "$new_desc"
+        print_color $GREEN "✅  Description updated for branch '$current_branch'"
+    else
+        print_color $YELLOW "No description entered. Aborting."
+    fi
+}
+
+# Function to view the description of the current branch
+view_current_branch_description() {
+    local current_branch=$(git rev-parse --abbrev-ref HEAD)
+    local config_key="branch.$current_branch.description"
+    
+    print_color $BLUE "Description for branch '$current_branch':"
+    
+    local description=$(git config $config_key)
+    
+    if [ -n "$description" ]; then
+        echo "$description"
+    else
+        print_color $YELLOW "No description found for branch '$current_branch'"
+    fi
+}
+
+# Function to view descriptions for all local branches
+view_all_branch_descriptions() {
+    print_color $BLUE "Descriptions for all local branches:"
+    
+    local branches=$(git for-each-ref --format='%(refname:short)' refs/heads/)
+    
+    for branch in $branches; do
+        local config_key="branch.$branch.description"
+        local description=$(git config $config_key)
+        
+        if [ -n "$description" ]; then
+            print_color $GREEN "  $branch:"
+            echo "    $description"
+        else
+            print_color $YELLOW "  $branch: (no description)"
+        fi
+    done
+}
+
 # Function to display menu
 show_menu() {
     print_color $BLUE "\n=== Branch Cleanup Menu ==="
@@ -76,8 +133,12 @@ show_menu() {
     echo "4. Clean up merged local branches (safe)"
     echo "5. Update from remote and prune"
     echo "6. Show branch status summary"
-    echo "7. Exit"
-    echo -n "Choose an option (1-7): "
+    print_color $BLUE "\n=== Branch Description Menu ==="
+    echo "7. Edit description for current branch"
+    echo "8. View description for current branch"
+    echo "9. View all branch descriptions"
+    echo "10. Exit"
+    echo -n "Choose an option (1-10): "
 }
 
 # Function to list merged PRs
@@ -249,6 +310,18 @@ show_branch_summary() {
 
 # Main script execution
 main() {
+    # Check for command-line arguments
+    if [ "$1" = "--edit-description" ]; then
+        edit_branch_description
+        exit 0
+    elif [ "$1" = "--view-description" ]; then
+        view_current_branch_description
+        exit 0
+    elif [ "$1" = "--view-all-descriptions" ]; then
+        view_all_branch_descriptions
+        exit 0
+    fi
+
     print_color $BLUE "🚀  Interactive Branch Cleanup Tool"
 
     # Check prerequisites
@@ -281,11 +354,20 @@ main() {
                 show_branch_summary
                 ;;
             7)
+                edit_branch_description
+                ;;
+            8)
+                view_current_branch_description
+                ;;
+            9)
+                view_all_branch_descriptions
+                ;;
+            10)
                 print_color $GREEN "👋  Goodbye!"
                 exit 0
                 ;;
             *)
-                print_color $RED "Invalid option! Please choose 1-7."
+                print_color $RED "Invalid option! Please choose 1-10."
                 ;;
         esac
 
@@ -295,4 +377,4 @@ main() {
 }
 
 # Run the script
-main
+main "$@"
