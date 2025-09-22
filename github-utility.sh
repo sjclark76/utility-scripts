@@ -138,7 +138,7 @@ show_menu() {
     echo "8. View description for current branch"
     echo "9. View all branch descriptions"
     echo "10. Exit"
-    echo -n "Choose an option (1-10): "
+    echo -n "Choose an option (1-10 or q to quit): "
 }
 
 # Function to list merged PRs
@@ -250,18 +250,38 @@ cleanup_merged_branches() {
         fi
     done
 
-    echo -n -e "\n${YELLOW}Delete these branches? (y/N): ${NC}"
-    read confirm
+    echo -e "\n${YELLOW}Choose deletion mode:${NC}"
+    echo "1. Delete all merged branches at once"
+    echo "2. Review and delete branches one by one"
+    echo "3. Cancel"
+    echo -n "Enter choice (1-3): "
+    read delete_mode
 
-    if [[ $confirm =~ ^[Yy]$ ]]; then
-        for branch in "${merged_branches[@]}"; do
-            print_color $GREEN "Deleting $branch..."
-            git branch -d "$branch"
-        done
-        print_color $GREEN "✅  Cleanup complete!"
-    else
-        print_color $YELLOW "Cleanup cancelled."
-    fi
+    case $delete_mode in
+        1)
+            for branch in "${merged_branches[@]}"; do
+                print_color $GREEN "Deleting $branch..."
+                git branch -d "$branch"
+            done
+            print_color $GREEN "✅  Cleanup complete!"
+            ;;
+        2)
+            for branch in "${merged_branches[@]}"; do
+                echo -n -e "${YELLOW}Delete $branch? (y/N): ${NC}"
+                read confirm
+                if [[ $confirm =~ ^[Yy]$ ]]; then
+                    print_color $GREEN "Deleting $branch..."
+                    git branch -d "$branch"
+                else
+                    print_color $YELLOW "Skipped $branch."
+                fi
+            done
+            print_color $GREEN "✅  Selective cleanup complete!"
+            ;;
+        *)
+            print_color $YELLOW "Cleanup cancelled."
+            ;;
+    esac
 }
 
 # Function to update from remote and prune
@@ -362,7 +382,7 @@ main() {
             9)
                 view_all_branch_descriptions
                 ;;
-            10)
+            10|q|Q)
                 print_color $GREEN "👋  Goodbye!"
                 exit 0
                 ;;
